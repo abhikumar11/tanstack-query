@@ -1,30 +1,54 @@
-import React from 'react'
-import UserForm from './components/UserForm'
-import useUser from '../hooks/useUser';
+import React, { useState } from 'react';
+import { Button, Col, Row, Form } from 'react-bootstrap';
+import UserForm from './components/UserForm';
+import UserTable from './components/UserTable';
 
 const App = () => {
-   const {getAllUsers}=useUser();
-   const {data,isLoading,error}=getAllUsers;
-  return (
-    <div>
-        <h1 className='text-center mt-5'>User Management</h1>
-          {isLoading && <p>Loading users...</p>}
-          {error && <p className='text-danger'>Error: {error.readableMessage}</p>}
-          {data && (
-            <div className='container mt-4'>
-              <h2>All Users</h2>
-              <ul className='list-group'>
-                {data.map((user) => (
-                  <li key={user.id} className='list-group-item'>
-                    {user.name} - {user.email}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-      {/* <UserForm/> */}
-    </div>
-  )
-}
+  const [showForm, setShowForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
-export default App
+  const handleSearch = (e) => {
+    e.preventDefault();
+    console.log("Searching for:", searchTerm);
+  };
+
+  return (
+    <div className='container mt-5'> 
+      <Row className="align-items-end mb-4">
+        <Col md={6}>
+          <Form onSubmit={handleSearch} className="d-flex gap-2">
+            <Form.Control 
+              type="text" 
+              placeholder='Search Users...' 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Button type='submit' variant='outline-primary'>Search</Button>
+          </Form>
+        </Col>
+        <Col md={6} className="text-md-end">
+          <Button 
+            variant="primary" 
+            onClick={() => setShowForm(true)}
+          >
+            Add User
+          </Button>
+        </Col>
+      </Row>
+
+      <Row>
+        <Col>
+          <UserForm show={showForm} onHide={() => setShowForm(false)} />
+          <UserTable />
+        </Col>
+      </Row>  
+      <Row className="mt-4">
+        <Col>
+        Pagination
+        </Col>
+        </Row> 
+    </div>
+  );
+};
+
+export default App;
