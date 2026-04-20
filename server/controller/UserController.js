@@ -23,6 +23,31 @@ module.exports.GetUsers=async(req,res)=>{
     }
 };
 
+module.exports.SearchUsers = async (req, res) => {
+    try {
+        const { query = "" } = req.query;
+        const trimmedQuery = query.trim();
+
+        if (!trimmedQuery) {
+            const users = await User.find();
+            return res.status(200).json({ users });
+        }
+
+        const users = await User.find({
+            $or: [
+                { name: { $regex: trimmedQuery, $options: "i" } },
+                { email: { $regex: trimmedQuery, $options: "i" } },
+                { gender: { $regex: trimmedQuery, $options: "i" } },
+                { city: { $regex: trimmedQuery, $options: "i" } },
+            ],
+        });
+
+        res.status(200).json({ users });
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
 module.exports.DeleteUser=async(req,res)=>{
     try {
         const {id}=req.params; 

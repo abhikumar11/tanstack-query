@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "../utils/AxiosInterseptors";
 
-const useUser = () => {
+const useUser = (searchTerm = "") => {
   const queryClient = useQueryClient();
 
   const addUser = useMutation({
@@ -19,9 +19,12 @@ const useUser = () => {
     }) 
    
   const getAllUsers=useQuery({
-        queryKey: ["users"],
+        queryKey: ["users", searchTerm],
         queryFn: async () => {
-            const response = await axiosInstance.get("/getAllUsers");
+            const endpoint = searchTerm?.trim()
+              ? `/search?query=${encodeURIComponent(searchTerm.trim())}`
+              : "/getAllUsers";
+            const response = await axiosInstance.get(endpoint);
             return response?.users ?? [];
         }, 
         staleTime:10*1000,

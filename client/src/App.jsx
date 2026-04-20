@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Col, Row, Form } from 'react-bootstrap';
 import UserForm from './components/UserForm.jsx';
 import UserTable from './components/UserTable.jsx';
@@ -6,12 +6,16 @@ import UserTable from './components/UserTable.jsx';
 const App = () => {
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    console.log("Searching for:", searchTerm);
-  };
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 400);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
 
   const handleAddUser = () => {
     setSelectedUser(null);
@@ -32,14 +36,13 @@ const App = () => {
     <div className='container mt-5'> 
       <Row className="align-items-end mb-4">
         <Col md={6}>
-          <Form onSubmit={handleSearch} className="d-flex gap-2">
+          <Form>
             <Form.Control 
               type="text" 
               placeholder='Search Users...' 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <Button type='submit' variant='outline-primary'>Search</Button>
           </Form>
         </Col>
         <Col md={6} className="text-md-end">
@@ -59,7 +62,7 @@ const App = () => {
             onHide={handleHideForm}
             selectedUser={selectedUser}
           />
-          <UserTable onEdit={handleEditUser} />
+          <UserTable onEdit={handleEditUser} searchTerm={debouncedSearchTerm} />
         </Col>
       </Row>  
       <Row className="mt-4">
