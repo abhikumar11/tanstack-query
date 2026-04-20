@@ -1,7 +1,7 @@
 import useUser from '../../hooks/useUser';
 import {Table} from 'react-bootstrap';
-const UserTable = () => {
- const {getAllUsers}=useUser();
+const UserTable = ({ onEdit }) => {
+ const {getAllUsers, deleteUser}=useUser();
    const {data,isLoading,error}=getAllUsers;
   return (
     <div>
@@ -19,16 +19,16 @@ const UserTable = () => {
       <tbody>
         {isLoading && <tr><td colSpan={6}>Loading...</td></tr>}
         {error && <tr><td colSpan={6}>Error: {error.message}</td></tr>}
-        {data && data.map((user:any) => (
-          <tr key={user.id}>
+        {data && data.map((user) => (
+          <tr key={user._id}>
             <td>{user.name}</td>
             <td>{user.email}</td>
             <td>{user.age}</td>
             <td>{user.gender}</td>
             <td>{user.city}</td>
             <td>
-              <button className='btn btn-sm btn-primary'>Edit</button>
-              <button className='btn btn-sm btn-danger'>Delete</button>
+              <button className='btn btn-sm btn-primary' onClick={() => onEdit(user)}>Edit</button>
+              <button onClick={() => deleteUser.mutate(user._id)} className='btn btn-sm btn-danger'>Delete</button>
             </td>
           </tr>
         ))}

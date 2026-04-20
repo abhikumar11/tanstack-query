@@ -3,15 +3,15 @@ import axiosInstance from "../utils/AxiosInterseptors";
 
 const useUser = () => {
   const queryClient = useQueryClient();
-  
+
   const addUser = useMutation({
       mutationFn: async (user) => {
         const response = await axiosInstance.post("/add", user);
-        return response?.data;
+        return response;
       },
-      onSuccess: async() => {
+      onSuccess:() => {
         alert("User added successfully");
-        await queryClient.invalidateQueries({ queryKey: ["users"] })
+         queryClient.invalidateQueries({ queryKey: ["users"] })
       },
       onError: (error) => {
         alert("Error adding user:", error);
@@ -22,20 +22,37 @@ const useUser = () => {
         queryKey: ["users"],
         queryFn: async () => {
             const response = await axiosInstance.get("/getAllUsers");
-            return response?.users;
+            return response?.users ?? [];
         }, 
         staleTime:10*1000,
     });
 
-  const deleteUser = (userId) => {
-    console.log("Deleting user with ID:", userId);
-  
-  };
+  const deleteUser =useMutation({
+    mutationFn: async (userId) => {
+      await axiosInstance.delete(`/delete/${userId}`);
+    },
+    onSuccess:() => {
+      alert("User deleted successfully");
+       queryClient.invalidateQueries({ queryKey: ["users"] })
+    },
+    onError: (error) => {
+      alert("Error deleting user:", error);
+    },
+  })
 
-  const updateUser = (userId, updatedData) => {
-    console.log("Updating user with ID:", userId, "with data:", updatedData);
-   
-  };
+  const updateUser = useMutation({
+    mutationFn: async ( { userId, updatedData } ) => {
+      const response = await axiosInstance.put(`/update/${userId}`, updatedData);
+      return response;
+    },
+    onSuccess:() => {
+      alert("User updated successfully");
+       queryClient.invalidateQueries({ queryKey: ["users"] })
+    },
+    onError: (error) => {
+      alert("Error updating user:", error);
+    },
+  });
 
     return { addUser, getAllUsers, deleteUser, updateUser };
 }

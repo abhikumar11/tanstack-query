@@ -1,15 +1,31 @@
 import React, { useState } from 'react';
 import { Button, Col, Row, Form } from 'react-bootstrap';
-import UserForm from './components/UserForm';
-import UserTable from './components/UserTable';
+import UserForm from './components/UserForm.jsx';
+import UserTable from './components/UserTable.jsx';
 
 const App = () => {
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const handleSearch = (e) => {
     e.preventDefault();
     console.log("Searching for:", searchTerm);
+  };
+
+  const handleAddUser = () => {
+    setSelectedUser(null);
+    setShowForm(true);
+  };
+
+  const handleEditUser = (user) => {
+    setSelectedUser(user);
+    setShowForm(true);
+  };
+
+  const handleHideForm = () => {
+    setShowForm(false);
+    setSelectedUser(null);
   };
 
   return (
@@ -29,7 +45,7 @@ const App = () => {
         <Col md={6} className="text-md-end">
           <Button 
             variant="primary" 
-            onClick={() => setShowForm(true)}
+            onClick={handleAddUser}
           >
             Add User
           </Button>
@@ -38,8 +54,12 @@ const App = () => {
 
       <Row>
         <Col>
-          <UserForm show={showForm} onHide={() => setShowForm(false)} />
-          <UserTable />
+          <UserForm
+            show={showForm}
+            onHide={handleHideForm}
+            selectedUser={selectedUser}
+          />
+          <UserTable onEdit={handleEditUser} />
         </Col>
       </Row>  
       <Row className="mt-4">

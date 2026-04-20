@@ -1,13 +1,46 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Button, Col, Form, Modal, Row } from "react-bootstrap";
 import useUser from "../../hooks/useUser";
 
-const UserForm = ({ show, onHide }) => {
+const defaultValues = {
+     name: "",
+     email: "",
+     age: "",
+     gender: "",
+     city: "",
+};
+
+const UserForm = ({ show, onHide, selectedUser }) => {
      const { register, handleSubmit, reset } = useForm();
-const {addUser}=useUser();
+     const { addUser, updateUser } = useUser();
+     const isEditMode = Boolean(selectedUser?._id);
+     const {isPending:updatePending}=updateUser;
+     const {isPending:addPending}=addUser;
+     useEffect(() => {
+          if (show && selectedUser) {
+               reset({
+                    name: selectedUser.name ?? "",
+                    email: selectedUser.email ?? "",
+                    age: selectedUser.age ?? "",
+                    gender: selectedUser.gender ?? "",
+                    city: selectedUser.city ?? "",
+               });
+               return;
+          }
+
+          reset(defaultValues);
+     }, [show, selectedUser, reset]);
+
      const onSubmit = (data) => {
-          addUser.mutate(data);
+          if (isEditMode) {
+               updateUser.mutate({
+                    userId: selectedUser._id,
+                    updatedData: data,
+               });
+          } else {
+               addUser.mutate(data);
+          }
           reset();
           onHide?.();
      };
@@ -15,7 +48,7 @@ const {addUser}=useUser();
      return (
           <Modal show={show} onHide={onHide} centered>
                <Modal.Header closeButton>
-                    <Modal.Title>Add User</Modal.Title>
+                    <Modal.Title>{isEditMode ? "Edit User" : "Add User"}</Modal.Title>
                </Modal.Header>
                <Form onSubmit={handleSubmit(onSubmit)}>
                     <Modal.Body>
@@ -100,7 +133,8 @@ const {addUser}=useUser();
                               Cancel
                          </Button>
                          <Button type="submit" variant="primary">
-                              Submit
+                              {isEditMode ? "Update" : "Submit"}
+                                   {(updatePending || addPending) && "Please wait..."}
                          </Button>
                     </Modal.Footer>
                </Form>
